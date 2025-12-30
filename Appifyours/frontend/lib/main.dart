@@ -6,12 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-// CORRECTED IMPORT: Using relative path or correct package name
-import 'config/environment.dart'; 
+// FIXED IMPORT: Relative path ensures it finds the file regardless of package name
+import 'config/environment.dart';
 
 // --- Helper Classes for Missing Dependencies ---
 
-// Added to fix "Undefined name 'AuthHelper'"
 class AuthHelper {
   static Future<bool> isAdmin() async {
     final prefs = await SharedPreferences.getInstance();
@@ -19,22 +18,70 @@ class AuthHelper {
   }
 }
 
-// --- Modified Existing Classes ---
+// --- Custom Badge Widget to support Flutter 3.10+ ---
+class CustomBadge extends StatelessWidget {
+  final String label;
+  final Widget child;
+  final Color? backgroundColor;
+  final Color? textColor;
 
-// Define PriceUtils class
+  const CustomBadge({
+    super.key,
+    required this.label,
+    required this.child,
+    this.backgroundColor = Colors.red,
+    this.textColor = Colors.white,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        if (label != '0')
+          Positioned(
+            right: -6,
+            top: -6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 16,
+                minHeight: 16,
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// --- Utility Classes ---
+
 class PriceUtils {
   static String formatPrice(double price, {String currency = '\$'}) {
     return '$currency${price.toStringAsFixed(2)}';
   }
 
-  // Extract numeric value from price string with any currency symbol
   static double parsePrice(String priceString) {
     if (priceString.isEmpty) return 0.0;
     String numericString = priceString.replaceAll(RegExp(r'[^\d.]'), '');
     return double.tryParse(numericString) ?? 0.0;
   }
 
-  // Detect currency symbol from price string
   static String detectCurrency(String priceString) {
     if (priceString.contains('₹')) return '₹';
     if (priceString.contains('\$')) return '\$';
@@ -45,10 +92,9 @@ class PriceUtils {
     if (priceString.contains('₽')) return '₽';
     if (priceString.contains('₦')) return '₦';
     if (priceString.contains('₨')) return '₨';
-    return '\$'; // Default to dollar
+    return '\$';
   }
 
-  // Added missing method
   static String currencySymbolFromCode(String code) {
     switch (code.toUpperCase()) {
       case 'USD': return '\$';
@@ -77,7 +123,6 @@ class PriceUtils {
   }
 }
 
-// Cart item model
 class CartItem {
   final String id;
   final String name;
@@ -85,7 +130,6 @@ class CartItem {
   final double discountPrice;
   int quantity;
   final String? image;
-  // Added missing field
   final String currencySymbol;
 
   CartItem({
@@ -95,14 +139,13 @@ class CartItem {
     this.discountPrice = 0.0,
     this.quantity = 1,
     this.image,
-    this.currencySymbol = '\$', // Fixed syntax error: was '$', now '\$'
+    this.currencySymbol = '\$',
   });
 
   double get effectivePrice => discountPrice > 0 ? discountPrice : price;
   double get totalPrice => effectivePrice * quantity;
 }
 
-// Cart manager
 class CartManager extends ChangeNotifier {
   final List<CartItem> _items = [];
   double _gstPercentage = 18.0;
@@ -180,7 +223,6 @@ class CartManager extends ChangeNotifier {
     return PriceUtils.applyShipping(totalWithTax, 5.99);
   }
 
-  // Added missing getters
   int get totalQuantity => _items.fold(0, (sum, item) => sum + item.quantity);
 
   String get displayCurrencySymbol {
@@ -189,14 +231,12 @@ class CartManager extends ChangeNotifier {
   }
 }
 
-// Wishlist item model
 class WishlistItem {
   final String id;
   final String name;
   final double price;
   final double discountPrice;
   final String? image;
-  // Fixed syntax error here
   final String currencySymbol;
 
   WishlistItem({
@@ -205,13 +245,12 @@ class WishlistItem {
     required this.price,
     this.discountPrice = 0.0,
     this.image,
-    this.currencySymbol = '\$', // Was: '$'
+    this.currencySymbol = '\$',
   });
 
   double get effectivePrice => discountPrice > 0 ? discountPrice : price;
 }
 
-// Wishlist manager
 class WishlistManager extends ChangeNotifier {
   final List<WishlistItem> _items = [];
 
@@ -248,7 +287,6 @@ class WishlistManager extends ChangeNotifier {
   }
 }
 
-// Fixed self-referencing initialization errors
 final String gstNumber = '';
 final String selectedCategory = '';
 final Map<String, dynamic> storeInfo = {
@@ -263,7 +301,6 @@ bool isLoading = true;
 String? errorMessage;
 Map<String, int> _productQuantities = {};
 
-// WebSocket Real-time Sync Service
 class DynamicAppSync {
   static final DynamicAppSync _instance = DynamicAppSync._internal();
   factory DynamicAppSync() => _instance;
@@ -353,7 +390,6 @@ class DynamicAppSync {
   }
 }
 
-// API Configuration
 class ApiConfig {
   static String get baseUrl => Environment.apiBase;
   static const String adminObjectId = '69528b60122de128433b64c4';
@@ -436,8 +472,6 @@ class AdminManager {
   }
 }
 
-// Removed global setState usage (orphaned code) and moved it to classes
-
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -456,7 +490,6 @@ class MyApp extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      // Fixed: CardThemeData is usually part of ThemeData.cardTheme
       cardTheme: CardTheme(
         elevation: 4,
         shadowColor: Colors.black12,
@@ -1173,7 +1206,6 @@ class _HomePageState extends State<HomePage> {
     return PriceUtils.detectCurrency((product['price'] ?? '').toString());
   }
 
-  // Added missing method
   void _handleBuyNow() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Proceeding to Checkout...')),
@@ -2872,17 +2904,15 @@ class _HomePageState extends State<HomePage> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Badge(
-            label: Text('${_cartManager.items.length}'),
-            isLabelVisible: _cartManager.items.length > 0,
+          icon: CustomBadge(
+            label: '${_cartManager.items.length}',
             child: const Icon(Icons.shopping_cart),
           ),
           label: 'Cart',
         ),
         BottomNavigationBarItem(
-          icon: Badge(
-            label: Text('${_wishlistManager.items.length}'),
-            isLabelVisible: _wishlistManager.items.length > 0,
+          icon: CustomBadge(
+            label: '${_wishlistManager.items.length}',
             child: const Icon(Icons.favorite),
           ),
           label: 'Wishlist',
