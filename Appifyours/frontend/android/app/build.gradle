@@ -7,28 +7,28 @@ plugins {
 
 android {
     namespace "com.appifyours.app"
-    // FIX 1: Update compileSdk to 35 to satisfy flutter_local_notifications
-    compileSdk 35 
-    
+
+    // ✅ FIX: Use stable SDK
+    compileSdk 34
+
     ndkVersion "25.1.8937393"
 
     compileOptions {
-        // FIX 2: Update source and target compatibility to Java 17 
-        // to match the CI JDK 17 environment and prevent D8 crashes
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        // FIX 3: Update Kotlin JVM target to 17
         jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId "com.appifyours.app"
         minSdk 21
-        // FIX 4: Update targetSdk to 35
-        targetSdk 35
+
+        // ✅ FIX: Match compileSdk
+        targetSdk 34
+
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -38,7 +38,9 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile(
+                'proguard-android-optimize.txt'
+            ), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
     }
