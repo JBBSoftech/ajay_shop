@@ -8,7 +8,7 @@ plugins {
 android {
     namespace "com.appifyours.app"
 
-    // ✅ FIX: Use stable SDK
+    // ✅ STABLE SDK (DO NOT USE 35 IN CI)
     compileSdk 34
 
     ndkVersion "25.1.8937393"
@@ -25,22 +25,27 @@ android {
     defaultConfig {
         applicationId "com.appifyours.app"
         minSdk 21
-
-        // ✅ FIX: Match compileSdk
         targetSdk 34
-
         versionCode 1
         versionName "1.0"
+
         multiDexEnabled true
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile(
-                'proguard-android-optimize.txt'
-            ), 'proguard-rules.pro'
+            proguardFiles
+                getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro'
+
+            // CI-safe
             signingConfig signingConfigs.debug
         }
     }
